@@ -124,6 +124,9 @@ public:
 	const std::string& connectorName() const;
 		/// Returns the name of the connector.
 
+	// Custom
+	Poco::Any getInsertId();
+
 private:
 
 	template <typename T>
@@ -168,17 +171,6 @@ private:
 inline bool SessionImpl::canTransact()
 {
 	return true;
-}
-
-
-inline void SessionImpl::setInsertId(const std::string&, const Poco::Any&)
-{
-}
-
-
-inline Poco::Any SessionImpl::getInsertId(const std::string&)
-{
-	return Poco::Any(Poco::UInt64(mysql_insert_id(_handle)));
 }
 
 

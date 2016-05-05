@@ -19,7 +19,7 @@
 #ifndef Data_SessionPool_INCLUDED
 #define Data_SessionPool_INCLUDED
 
-
+#include "Poco/SharedPtr.h"
 #include "Poco/Data/Data.h"
 #include "Poco/Data/PooledSessionHolder.h"
 #include "Poco/Data/PooledSessionImpl.h"
@@ -29,6 +29,7 @@
 #include "Poco/Timer.h"
 #include "Poco/Mutex.h"
 #include <list>
+#include <unordered_map>
 
 
 namespace Poco {
@@ -69,6 +70,18 @@ class Data_API SessionPool: public RefCountedObject
 	///     ...
 {
 public:
+	typedef Poco::AutoPtr<PooledSessionHolder> PooledSessionHolderPtr;
+	typedef std::vector<Poco::Data::Statement> StatementCache;
+
+	struct SessionData
+	{
+		PooledSessionHolderPtr session;
+		std::unordered_map <std::string, StatementCache> statements_map;
+	};
+	
+	typedef Poco::SharedPtr<SessionData> SessionDataPtr;
+	typedef std::list < SessionDataPtr > SessionList;
+
 	SessionPool(const std::string& connector, 
 		const std::string& connectionString, 
 		int minSessions = 1, 
@@ -94,6 +107,7 @@ public:
 		/// If the maximum number of sessions for this pool has
 		/// already been created, a SessionPoolExhaustedException
 		/// is thrown.
+	Session get(SessionDataPtr &session_data_ptr);
 	
 	template <typename T>
 	Session get(const std::string& name, const T& value)
@@ -137,8 +151,7 @@ public:
 	std::string name() const;
 		/// Returns the name for this pool.
 
-	static std::string name(const std::string& connector,
-		const std::string& connectionString);
+	static std::string name(const std::string& connector, const std::string& connectionString);
 	/// Returns the name formatted from supplied arguments as "connector:///connectionString".
 
 	void setFeature(const std::string& name, bool state);
@@ -160,9 +173,7 @@ public:
 		/// Returns true if session pool is active (not shut down).
 
 protected:
-	typedef Poco::AutoPtr<PooledSessionHolder>    PooledSessionHolderPtr;
 	typedef Poco::AutoPtr<PooledSessionImpl>      PooledSessionImplPtr;
-	typedef std::list<PooledSessionHolderPtr>     SessionList;
 	typedef Poco::HashMap<std::string, bool>      FeatureMap;
 	typedef Poco::HashMap<std::string, Poco::Any> PropertyMap;
 

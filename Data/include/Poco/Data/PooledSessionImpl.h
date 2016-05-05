@@ -67,6 +67,9 @@ public:
 	void setProperty(const std::string& name, const Poco::Any& value);
 	Poco::Any getProperty(const std::string& name);
 	
+	//Custom
+	Poco::Any getInsertId();
+	
 protected:
 	SessionImpl* access() const;
 		/// Updates the last access timestamp,

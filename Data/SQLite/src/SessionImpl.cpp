@@ -269,4 +269,11 @@ sqlite3* Utility::dbHandle(const Session& session)
 }
 
 
+Poco::Any SessionImpl::getInsertId()
+{
+	return Poco::Any(Poco::UInt64(sqlite3_last_insert_rowid(_pDB)));
+}
+
+
+
 } } } // namespace Poco::Data::SQLite

@@ -179,6 +179,11 @@ Poco::Any PooledSessionImpl::getProperty(const std::string& name)
 	return access()->getProperty(name);
 }
 
+Poco::Any PooledSessionImpl::getInsertId()
+{
+	return access()->getInsertId();
+}
+
 
 SessionImpl* PooledSessionImpl::access() const
 {

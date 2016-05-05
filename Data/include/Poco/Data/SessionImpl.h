@@ -67,7 +67,7 @@ public:
 		/// a disconnected session.
 		/// If the connection is not established within requested timeout 
 		/// (specified in seconds), a ConnectionFailedException is thrown. 
-		/// Zero timout means indefinite
+		/// Zero timeout means indefinite
 
 	virtual void close() = 0;
 		/// Closes the connection.
@@ -166,11 +166,14 @@ public:
 		///
 		/// Throws a NotSupportedException if the requested property is
 		/// not supported by the underlying implementation.
+		
+	// Custom
+	virtual Poco::Any getInsertId() = 0;
 
 protected:
 	void setConnectionString(const std::string& connectionString);
 		/// Sets the connection string. Should only be called on
-		/// disconnetced sessions. Throws InvalidAccessException when called on
+		/// disconnected sessions. Throws InvalidAccessException when called on
 		/// a connected session.
 
 private:

@@ -80,6 +80,9 @@ public:
 	Message(const Message& msg);
 		/// Creates a Message by copying another one.
 		
+	Message(Message&& msg);
+		/// Creates a Message by copying another one.
+		
 	Message(const Message& msg, const std::string& text);
 		/// Creates a Message by copying all but the text from another message.
 		
@@ -87,6 +90,9 @@ public:
 		/// Destroys the Message.
 	
 	Message& operator = (const Message& msg);
+		/// Assignment operator.
+		
+	Message& operator = (Message&& msg);
 		/// Assignment operator.
 		
 	void swap(Message& msg);
@@ -127,6 +133,9 @@ public:
 		
 	long getTid() const;
 		/// Returns the numeric thread identifier for the message.
+	
+	long getOsTid() const;
+		/// Returns the numeric OS thread identifier for the message.
 	
 	void setPid(long pid);
 		/// Sets the process identifier for the message.
@@ -196,6 +205,7 @@ private:
 	Priority    _prio;
 	Timestamp   _time;
 	int         _tid;
+	int         _ostid;
 	std::string _thread;
 	long        _pid;
 	const char* _file;
@@ -240,6 +250,12 @@ inline const std::string& Message::getThread() const
 inline long Message::getTid() const
 {
 	return _tid;
+}
+
+
+inline long Message::getOsTid() const
+{
+	return _ostid;
 }
 
 
