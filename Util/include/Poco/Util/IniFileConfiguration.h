@@ -71,6 +71,13 @@ public:
 		/// Loads the configuration data from the given file, which 
 		/// must be in initialization file format.
 
+	void loadExtra(std::istream& istr);	
+		// Doesn't Clear Previous Loaded Data
+	
+	void loadExtra(const std::string& path);
+		// Doesn't Clear Previous Loaded Data
+
+
 protected:
 	bool getRaw(const std::string& key, std::string& value) const;
 	void setRaw(const std::string& key, const std::string& value);

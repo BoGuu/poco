@@ -52,7 +52,6 @@ SessionImpl::SessionImpl(const std::string& connectionString, std::size_t loginT
 	_connected(false),
 	_inTransaction(false)
 {
-	addProperty("insertId", &SessionImpl::setInsertId, &SessionImpl::getInsertId);
 	setProperty("handle", static_cast<MYSQL*>(_handle));
 	open();
 }
@@ -273,6 +272,12 @@ void SessionImpl::setConnectionTimeout(std::size_t timeout)
 	_handle.options(MYSQL_OPT_READ_TIMEOUT, static_cast<unsigned int>(timeout));
 	_handle.options(MYSQL_OPT_WRITE_TIMEOUT, static_cast<unsigned int>(timeout));
 	_timeout = timeout;
+}
+
+
+Poco::Any SessionImpl::getInsertId()
+{
+	return Poco::Any(Poco::UInt64(mysql_insert_id(_handle)));
 }
 
 

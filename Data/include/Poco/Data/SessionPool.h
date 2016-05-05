@@ -19,7 +19,7 @@
 #ifndef Data_SessionPool_INCLUDED
 #define Data_SessionPool_INCLUDED
 
-
+#include "Poco/SharedPtr.h"
 #include "Poco/Data/Data.h"
 #include "Poco/Data/PooledSessionHolder.h"
 #include "Poco/Data/PooledSessionImpl.h"
@@ -29,6 +29,7 @@
 #include "Poco/Timer.h"
 #include "Poco/Mutex.h"
 #include <list>
+#include <unordered_map>
 
 
 namespace Poco {
@@ -42,7 +43,7 @@ class Data_API SessionPool: public RefCountedObject
 	/// operation. Therefore it makes sense to reuse a session object
 	/// once it is no longer needed.
 	///
-	/// A SessionPool manages a collection of SessionImpl objects 
+	/// A SessionPool manages a collection of SessionImpl objects
 	/// (decorated with a PooledSessionImpl).
 	///
 	/// When a SessionImpl object is requested, the SessionPool first
@@ -54,7 +55,7 @@ class Data_API SessionPool: public RefCountedObject
 	/// can be set on the maximum number of objects.
 	/// Sessions found not to be connected to the database are purged
 	/// from the pool whenever one of the following events occurs:
-	/// 
+	///
 	///   - JanitorTimer event
 	///   - get() request
 	///   - putBack() request
@@ -69,10 +70,22 @@ class Data_API SessionPool: public RefCountedObject
 	///     ...
 {
 public:
-	SessionPool(const std::string& connector, 
-		const std::string& connectionString, 
-		int minSessions = 1, 
-		int maxSessions = 32, 
+	typedef Poco::AutoPtr<PooledSessionHolder> PooledSessionHolderPtr;
+	typedef std::vector<Poco::Data::Statement> StatementCache;
+
+	struct SessionData
+	{
+		PooledSessionHolderPtr session;
+		std::unordered_map <std::string, StatementCache> statements_map;
+	};
+
+	typedef Poco::SharedPtr<SessionData> SessionDataPtr;
+	typedef std::list < SessionDataPtr > SessionList;
+
+	SessionPool(const std::string& connector,
+		const std::string& connectionString,
+		int minSessions = 1,
+		int maxSessions = 32,
 		int idleTime = 60);
 		/// Creates the SessionPool for sessions with the given connector
 		/// and connectionString.
@@ -83,23 +96,24 @@ public:
 
 	~SessionPool();
 		/// Destroys the SessionPool.
-		
+
 	Session get();
 		/// Returns a Session.
 		///
 		/// If there are unused sessions available, one of the
 		/// unused sessions is recycled. Otherwise, a new session
-		/// is created. 
+		/// is created.
 		///
 		/// If the maximum number of sessions for this pool has
 		/// already been created, a SessionPoolExhaustedException
 		/// is thrown.
-	
+	Session get(SessionDataPtr &session_data_ptr);
+
 	template <typename T>
 	Session get(const std::string& name, const T& value)
 		/// Returns a Session with requested property set.
 		/// The property can be different from the default pool
-		/// value, in which case it is reset back to the pool 
+		/// value, in which case it is reset back to the pool
 		/// value when the session is reclaimed by the pool.
 	{
 		Session s = get();
@@ -113,32 +127,31 @@ public:
 	Session get(const std::string& name, bool value);
 		/// Returns a Session with requested feature set.
 		/// The feature can be different from the default pool
-		/// value, in which case it is reset back to the pool 
+		/// value, in which case it is reset back to the pool
 		/// value when the session is reclaimed by the pool.
 
 	int capacity() const;
 		/// Returns the maximum number of sessions the SessionPool will manage.
-		
+
 	int used() const;
 		/// Returns the number of sessions currently in use.
-		
+
 	int idle() const;
 		/// Returns the number of idle sessions.
-		
+
 	int dead();
 		/// Returns the number of not connected active sessions.
 
 	int allocated() const;
 		/// Returns the number of allocated sessions.
-		
+
 	int available() const;
 		/// Returns the number of available (idle + remaining capacity) sessions.
 
 	std::string name() const;
 		/// Returns the name for this pool.
 
-	static std::string name(const std::string& connector,
-		const std::string& connectionString);
+	static std::string name(const std::string& connector, const std::string& connectionString);
 	/// Returns the name formatted from supplied arguments as "connector:///connectionString".
 
 	void setFeature(const std::string& name, bool state);
@@ -166,9 +179,7 @@ protected:
 		///
 		/// The default implementation does nothing.
 
-	typedef Poco::AutoPtr<PooledSessionHolder>    PooledSessionHolderPtr;
 	typedef Poco::AutoPtr<PooledSessionImpl>      PooledSessionImplPtr;
-	typedef std::list<PooledSessionHolderPtr>     SessionList;
 	typedef Poco::HashMap<std::string, bool>      FeatureMap;
 	typedef Poco::HashMap<std::string, Poco::Any> PropertyMap;
 
@@ -179,14 +190,14 @@ protected:
 	void onJanitorTimer(Poco::Timer&);
 
 private:
-	typedef std::pair<std::string, Poco::Any> PropertyPair; 
-	typedef std::pair<std::string, bool> FeaturePair; 
+	typedef std::pair<std::string, Poco::Any> PropertyPair;
+	typedef std::pair<std::string, bool> FeaturePair;
 	typedef std::map<SessionImpl*, PropertyPair> AddPropertyMap;
 	typedef std::map<SessionImpl*, FeaturePair> AddFeatureMap;
 
 	SessionPool(const SessionPool&);
 	SessionPool& operator = (const SessionPool&);
-		
+
 	void closeAll(SessionList& sessionList);
 
 	std::string    _connector;
@@ -205,7 +216,7 @@ private:
 	AddFeatureMap  _addFeatureMap;
 	mutable
 	Poco::Mutex _mutex;
-	
+
 	friend class PooledSessionImpl;
 };
 

@@ -116,6 +116,10 @@ public:
 
 	const std::string& connectorName() const;
 		/// Returns the name of the connector.
+		
+	// Custom
+	Poco::Any getInsertId();		
+
 
 protected:
 	void setConnectionTimeout(const std::string& prop, const Poco::Any& value);
@@ -163,6 +167,5 @@ inline std::size_t SessionImpl::getConnectionTimeout()
 
 
 } } } // namespace Poco::Data::SQLite
-
 
 #endif // Data_SQLite_SessionImpl_INCLUDED

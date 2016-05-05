@@ -8,6 +8,11 @@
 
 cmake_minimum_required(VERSION 2.8.12)
 
+set(CMAKE_USER_MAKE_RULES_OVERRIDE
+   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/c_flag_overrides.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
+   ${CMAKE_CURRENT_SOURCE_DIR}/cmake/cxx_flag_overrides.cmake)
+
 project(Poco)
 
 file(STRINGS "${PROJECT_SOURCE_DIR}/libversion" SHARED_LIBRARY_VERSION)
@@ -40,6 +45,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 #################################################################################
 # Setup C/C++ compiler options
 #################################################################################
+
+add_definitions(-DPOCO_ENABLE_CPP11)
 
 if(NOT MSVC_IDE)
   if(NOT CMAKE_BUILD_TYPE)
@@ -247,7 +254,7 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local")
 include(CPack)
 
 #############################################################
-# cmake config files 
+# cmake config files
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
@@ -290,4 +297,3 @@ message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO:=${CMAKE_CXX_FLAGS_RELWITHDEBINFO
 foreach(component ${Poco_COMPONENTS})
 message(STATUS "Building: ${component}")
 endforeach()
-

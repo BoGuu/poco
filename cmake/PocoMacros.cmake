@@ -267,7 +267,7 @@ if (MSVC)
 # install the targets pdb
   POCO_INSTALL_PDB(${target_name})
 endif()
-  
+
 endmacro()
 
 #  POCO_INSTALL_PDB - Install the given target's companion pdb file (if present)

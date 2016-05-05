@@ -80,6 +80,27 @@ void IniFileConfiguration::load(const std::string& path)
 }
 
 
+void IniFileConfiguration::loadExtra(std::istream& istr)
+{
+	//_map.clear();
+	//_sectionKey.clear();
+	while (!istr.eof())
+	{
+		parseLine(istr);
+	}
+}
+
+
+void IniFileConfiguration::loadExtra(const std::string& path)
+{
+	Poco::FileInputStream istr(path);
+	if (istr.good())
+		loadExtra(istr);
+	else
+		throw Poco::OpenFileException(path);
+}
+
+
 bool IniFileConfiguration::getRaw(const std::string& key, std::string& value) const
 {
 	IStringMap::const_iterator it = _map.find(key);

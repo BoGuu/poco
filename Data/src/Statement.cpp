@@ -80,6 +80,16 @@ void Statement::swap(Statement& other)
 	swap(_pRowFormatter, other._pRowFormatter);
 }
 
+void Statement::bindClear()
+{
+	_pImpl->_bindings.clear();
+}
+
+void Statement::bindFixup()
+{
+	_pImpl->fixupBinding();
+}
+
 
 Statement& Statement::reset(Session& session)
 {
